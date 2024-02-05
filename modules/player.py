@@ -12,13 +12,19 @@ class Player(SpriteSheetAnimation):
         self.scale = 1
         self.tileset_size=(8, 1)
         self.autoplay = True
+        self.double_sided = True
 
     def update(self):
         speed = config['Player']['speed']
         if held_keys['shift']: speed = config['Player']['run-speed']
 
-        if held_keys['a']:self.x -= speed
-        if held_keys['d']:self.x += speed
+        if held_keys['a']:
+            self.rotation_y = 180
+            self.x -= speed
+
+        if held_keys['d']:
+            self.rotation_y = 0
+            self.x += speed
 
         if held_keys['w']: self.y += speed
         if held_keys['s']: self.y -= speed
@@ -30,5 +36,6 @@ class Player(SpriteSheetAnimation):
 
         if key == 'a' or key == 'd': self.play_animation('walk')
         
-        if key == 'a up' or key == 'd up': self.play_animation('idle')
+        if key == 'a up' or key == 'd up':
+            if not held_keys['a'] and not held_keys['d']: self.play_animation('idle')
 
