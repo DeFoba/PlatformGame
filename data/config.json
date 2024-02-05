@@ -4,5 +4,12 @@
         "scale": 0.012,
         "min-scale": 0.001,
         "color": [255, 0, 0, 255]
+    },
+
+    "Player": {
+        "speed": 0.05,
+        "run-speed": 0.1,
+        "position": [0, 0, 0],
+        "color": [255, 255, 255, 255]
     }
 }

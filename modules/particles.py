@@ -21,5 +21,11 @@ class Particles(Entity):
 
 def CreatePartiles():
     particles = [None] * config['Particles']['count']
+    print(mouse.x, mouse.y)
     for i in range(len(particles)):
         particles[i] = Particles(mouse.x, mouse.y)
+
+def SpawnParticles(x, y):
+    particles = [None] * config['Particles']['count']
+    for i in range(len(particles)):
+        particles[i] = Particles(x, y)
