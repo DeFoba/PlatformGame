@@ -1,4 +1,4 @@
-from ursina import Entity, color, held_keys, SpriteSheetAnimation
+from ursina import Entity, color, held_keys, SpriteSheetAnimation, time
 from modules.config_loader import config
 from modules.particles import SpawnParticles
 
@@ -16,17 +16,20 @@ class Player(SpriteSheetAnimation):
             'idle': ((0, 0), (7, 0)),
             'run': ((0, 0), (6, 0)),
             'jump': ((0, 0), (12, 0)),
-            })
+            }, fps=12)
 
         self.position = config['Player']['position']
         self.model = 'quad'
         self.color = color.rgb(*config['Player']['color'])
-        self.scale = 1
+        self.scale = 2
         self.tileset_size=(8, 1)
         self.autoplay = True
         self.double_sided = True
+        self._collider = 'box'
 
         self.is_shift = False
+        self.fall = True
+        self.speed = 0.02
 
         self.play_animation('idle')
 
@@ -45,13 +48,18 @@ class Player(SpriteSheetAnimation):
             self.rotation_y = 0
             self.x += speed
 
-        if held_keys['w']: self.y += speed
-        if held_keys['s']: self.y -= speed
+        # if held_keys['w']: self.y += speed
+        # if held_keys['s']: self.y -= speed
+            
 
+        if self.fall:
+            print(self.speed)
+            self.y -= self.speed
+            
 
     def input(self, key):
         if key == 'space':
-            SpawnParticles(self.x, self.y)
+            SpawnParticles(self.x, self.y - self.scale_x / 2)
             self.change_animation('jump')
             self.play_animation('jump')
 

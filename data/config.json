@@ -3,7 +3,7 @@
         "count": 10,
         "scale": 0.5,
         "min-scale": 0.001,
-        "color": [255, 0, 0, 255]
+        "color": [0, 0, 255, 255]
     },
 
     "Player": {
