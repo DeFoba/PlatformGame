@@ -1,6 +1,7 @@
-from ursina import Entity, color, held_keys, SpriteSheetAnimation, time
-from modules.config_loader import config
+from ursina import Entity, color, held_keys, SpriteSheetAnimation, camera, invoke
+from modules.config_loader import config, is_exit
 from modules.particles import SpawnParticles
+from modules.HUD import Stamina, Exit
 
 ANIMATION_SET = {
     'walk': ('assets/Blue_Slime/walk', (8, 1)),
@@ -10,7 +11,9 @@ ANIMATION_SET = {
 }
 
 class Player(SpriteSheetAnimation):
+    '''Main Player class, for init Player entity'''
     def __init__(self):
+        # Init Sprite Sheet Animation
         super().__init__('assets/Blue_Slime/idle', {
             'walk': ((0, 0), (7, 0)),
             'idle': ((0, 0), (7, 0)),
@@ -18,6 +21,7 @@ class Player(SpriteSheetAnimation):
             'jump': ((0, 0), (12, 0)),
             }, fps=12)
 
+        # Configure Player
         self.position = config['Player']['position']
         self.model = 'quad'
         self.color = color.rgb(*config['Player']['color'])
@@ -27,46 +31,83 @@ class Player(SpriteSheetAnimation):
         self.double_sided = True
         self._collider = 'box'
 
-        self.is_shift = False
-        self.fall = True
-        self.speed = 0.02
+        # Load HUD
+        self.stamina = Stamina(.5)
 
+        # Check variables
+        self.is_shift = False
+
+        # Run Idle Animation
         self.play_animation('idle')
 
     def change_animation(self, anim):
+        '''Change Player Animation'''
         self.texture, self.tileset_size = ANIMATION_SET[anim]
 
     def update(self):
+        '''Player movement and Camera forward'''
         speed = config['Player']['speed']
-        if held_keys['shift']: speed = config['Player']['run-speed']
+        if held_keys['shift']:
+            if self.stamina.scale_x > .05:
+                self.stamina.scale_x -= .01
+                speed = config['Player']['run-speed']
+
+        if self.stamina.scale_x < self.stamina.scale_max and not held_keys['shift']:
+            self.stamina.scale_x += .002
 
         if held_keys['a']:
             self.rotation_y = 180
-            self.x -= speed
+            if self.x > -.2:
+                self.x -= speed
+            else: self.x = -.2
 
         if held_keys['d']:
             self.rotation_y = 0
-            self.x += speed
+            if self.x < config['Block']['max-width'] - 0.7:
+                self.x += speed
+            else: self.x = config['Block']['max-width'] - 0.7
 
-        # if held_keys['w']: self.y += speed
-        # if held_keys['s']: self.y -= speed
-            
+        if held_keys['w']:
+            if self.z < config['Block']['max-height'] - 0.6:
+                self.z += speed
+            else:
+                self.z = config['Block']['max-height'] - 0.6
 
-        if self.fall:
-            print(self.speed)
-            self.y -= self.speed
+        if held_keys['s']:
+            if self.z > -.5:
+                self.z -= speed
+            else:
+                self.z = -.5
+    
+
+        # Camera poition forward
+        camera.x += (self.x - camera.x) / 8
+        camera.z += (self.z - camera.z) / 8 - 1.5
+        camera.y += (self.y - camera.y) / 6 + 0.5
+
+        # Camera rotation
+        camera.look_at(self)
+
+    def close_app(self):
+        global is_exit
+        is_exit = True
+        quit()
             
 
     def input(self, key):
+        '''Check Player inputs for change animation'''
+        if key == 'shift':
+            SpawnParticles(self.x, self.y - self.scale_x / 2, self.z)
+
         if key == 'space':
-            SpawnParticles(self.x, self.y - self.scale_x / 2)
-            self.change_animation('jump')
-            self.play_animation('jump')
+            SpawnParticles(self.x, self.y - self.scale_x / 2, self.z)
+            # self.change_animation('jump')
+            # self.play_animation('jump')
 
         if key == 'shift': self.is_shift = True
         if key == 'shift up': self.is_shift = False
 
-        if key == 'a' or key == 'd':
+        if key == 'a' or key == 'd' or key == 'w' or key == 's':
             if self.is_shift:
                 self.change_animation('run')
                 self.play_animation('run')
@@ -74,8 +115,12 @@ class Player(SpriteSheetAnimation):
                 self.change_animation('walk')
                 self.play_animation('walk')
         
-        if key == 'a up' or key == 'd up':
-            if not held_keys['a'] and not held_keys['d']:
+        if key == 'a up' or key == 'd up' or key == 'w up' or key == 's up':
+            if not held_keys['a'] and not held_keys['d'] and not held_keys['w'] and not held_keys['s']:
                 self.change_animation('idle')
                 self.play_animation('idle')
 
+        if key == 'escape':
+            Exit()
+            invoke(self.close_app, delay=2)
+            

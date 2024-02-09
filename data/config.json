@@ -3,7 +3,7 @@
         "count": 10,
         "scale": 0.5,
         "min-scale": 0.001,
-        "color": [0, 0, 255, 255]
+        "color": [180, 180, 180, 100]
     },
 
     "Player": {
@@ -11,5 +11,11 @@
         "run-speed": 0.1,
         "position": [0, 0, 0],
         "color": [255, 255, 255, 255]
+    },
+
+    "Block": {
+        "max-width": 5,
+        "max-height": 5,
+        "scale": 1
     }
 }
