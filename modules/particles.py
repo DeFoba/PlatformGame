@@ -2,12 +2,12 @@ from ursina import Entity, random, destroy, color, camera, mouse
 from modules.config_loader import config
 
 class Particles(Entity):
-    def __init__(self, x, y, z):
+    def __init__(self, x, y, z, color = color.rgb(*config['Particles']['color'])):
         super().__init__()
 
         # self.parent = camera.ui
         self.model = "circle"
-        self.color = color.rgb(*config['Particles']['color'])
+        self.color = color
         self.scale = config['Particles']['scale']
         self.x = x
         self.y = y

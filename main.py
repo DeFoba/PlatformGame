@@ -1,8 +1,7 @@
 from ursina import *
-# from modules.particles import CreateParticles
 from modules.player import Player
 from modules.config_loader import config
-from modules.map_creator import Block, CreatePlatform
+from modules.map_creator import CreatePlatform
 
 
 if __name__ == '__main__':
@@ -16,7 +15,9 @@ if __name__ == '__main__':
     player = Player()
 
     # Create Platform
-    CreatePlatform(y= -1.5)
+    CreatePlatform(y= -1.3)
+
+    AmbientLight(color = color.rgb(100, 100, 100, .1))
 
     # Run Main App
     app.run()

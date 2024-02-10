@@ -25,7 +25,7 @@ class Player(SpriteSheetAnimation):
         self.position = config['Player']['position']
         self.model = 'quad'
         self.color = color.rgb(*config['Player']['color'])
-        self.scale = 2
+        self.scale = 1.5
         self.tileset_size=(8, 1)
         self.autoplay = True
         self.double_sided = True

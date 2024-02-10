@@ -10,6 +10,8 @@ class Block(Entity):
         self.model = 'cube'
         self.texture = 'white_cube'
 
+        self.default_y = y
+
         self.x = x
         self.y = y
         self.z = z
@@ -25,11 +27,11 @@ class Block(Entity):
         invoke(self.make_red, delay=self.delay)
 
     def _thread_colorize(self):
-        for n in [x for x in range(1, self.delay + 1)]:
-            if is_exit: break
-            self.color = color.rgb(255, 255 // n, 255 // n, 255)
-            time.sleep(0.2)
-        self.y -= .1
+        self.animate_color(color.rgb(255, 0, 0), 1)
+        time.sleep(1)
+            
+        self.animate_y(-2, duration=0.5)
+
         self.texture = 'noise'
         time.sleep(1)
         self.color = (255, 0, 0, 255)
@@ -39,9 +41,12 @@ class Block(Entity):
 
     def update(self):
         if self.color == (255, 0, 0, 255):
-            self.y += .1
+            # self.y -= .1
+            self.animate_y(self.default_y, duration=0.5)
+
             self.texture = 'white_cube'
-            self.color = (255, 255, 255, 255)
+            self.animate_color(color.rgb(255, 255, 255), 0.5)
+
             self.start_delay()
 
 def CreatePlatform(x = 0, y = 0, z = 0, width = config['Block']['max-width'], height = config['Block']['max-height']):
