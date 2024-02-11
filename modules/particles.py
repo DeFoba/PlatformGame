@@ -25,3 +25,8 @@ def SpawnParticles(x, y, z):
     particles = [None] * config['Particles']['count']
     for i in range(len(particles)):
         particles[i] = Particles(x, y, z)
+
+def HitParticles(x, y, z):
+    particles = [None] * config['Particles']['count']
+    for i in range(len(particles)):
+        particles[i] = Particles(x, y, z, color.rgb(255, 0, 0, 100))

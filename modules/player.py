@@ -1,6 +1,6 @@
-from ursina import Entity, color, held_keys, SpriteSheetAnimation, camera, invoke
+from ursina import Entity, color, held_keys, SpriteSheetAnimation, camera, invoke, BoxCollider
 from modules.config_loader import config, is_exit
-from modules.particles import SpawnParticles
+from modules.particles import SpawnParticles, HitParticles
 from modules.HUD import Stamina, Exit
 
 ANIMATION_SET = {
@@ -20,6 +20,9 @@ class Player(SpriteSheetAnimation):
             'run': ((0, 0), (6, 0)),
             'jump': ((0, 0), (12, 0)),
             }, fps=12)
+        
+        self.collider = BoxCollider(self, center=(0, -.3, 0), size=(0.4, 0.3, 0.3))
+        # self.collider.visible = True
 
         # Configure Player
         self.position = config['Player']['position']
@@ -30,6 +33,10 @@ class Player(SpriteSheetAnimation):
         self.autoplay = True
         self.double_sided = True
         self._collider = 'box'
+
+        # Hitting
+        self.hitting = False
+        self.lives = 3
 
         # Load HUD
         self.stamina = Stamina(.5)
@@ -78,6 +85,13 @@ class Player(SpriteSheetAnimation):
                 self.z -= speed
             else:
                 self.z = -.5
+
+        if self.hitting:
+            self.collision = False
+            self.hitting = False
+            # camera.shake(1, magnitude=10)
+            HitParticles(self.x, self.y - self.scale_x / 2, self.z)
+            invoke(self.turn_on_collision, delay=3)
     
 
         # Camera poition forward
@@ -87,6 +101,9 @@ class Player(SpriteSheetAnimation):
 
         # Camera rotation
         camera.look_at(self)
+
+    def turn_on_collision(self):
+        self.collision = 'box'
 
     def close_app(self):
         global is_exit
