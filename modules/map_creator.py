@@ -1,5 +1,7 @@
-from ursina import Entity, color, invoke, random, time, print_on_screen, Sky
+from ursina import Entity, color, invoke, random, time, print_on_screen, Sky, PointLight
+from ursina.shaders import lit_with_shadows_shader
 from modules.config_loader import config, is_exit
+from modules.enemy import Cannon
 from threading import Thread
 
 class Block(Entity):
@@ -19,7 +21,7 @@ class Block(Entity):
         self.z = z
 
         self._collider = 'cube'
-        self.trap = Entity(model='assets/trap.obj', position=(self.x, self.y, self.z), scale=0.5, color=color.rgb(255, 255, 255), collider='box')
+        self.trap = Entity(model='assets/trap.obj', position=(self.x, self.y, self.z), scale=0.5, color=color.rgb(255, 255, 255), collider='box', shader = lit_with_shadows_shader)
         # self.trap._collider.visible = True
 
         self.delay = int
@@ -67,3 +69,12 @@ def CreatePlatform(x = 0, y = 0, z = 0, width = config['Block']['max-width'], he
     for n in range(x, width):
         for m in range(z, height):
             Block(n, y, m, player)
+
+    
+    Cannon(-2, 1, height, player)
+    Cannon(width + 1, 1, height, player)
+
+    PointLight(x=-1, y=1, z=-1.5)
+    PointLight(x=width + 1, y=1, z=-1.5)
+
+    PointLight(x=width / 2, y=1, z=height / 2, color=color.rgb(255, 0, 0))

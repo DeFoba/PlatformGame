@@ -1,7 +1,8 @@
 from ursina import Entity, color, held_keys, SpriteSheetAnimation, camera, invoke, BoxCollider
+from ursina.shaders import *
 from modules.config_loader import config, is_exit
 from modules.particles import SpawnParticles, HitParticles
-from modules.HUD import Stamina, Exit
+from modules.HUD import Stamina, Exit, NickOnHead
 
 ANIMATION_SET = {
     'walk': ('assets/Blue_Slime/walk', (8, 1)),
@@ -34,12 +35,16 @@ class Player(SpriteSheetAnimation):
         self.double_sided = True
         self._collider = 'box'
 
+        # Armor
+        self.armor = Entity(model='sphere', origin=self.origin, color=color.rgb(0, 0, 100, 0), scale=0.8)
+
         # Hitting
         self.hitting = False
         self.lives = 3
 
         # Load HUD
-        self.stamina = Stamina(.5)
+        self.stamina = Stamina(.5, self)
+        self.nickanme = NickOnHead('MaoriToma', self)
 
         # Check variables
         self.is_shift = False
@@ -90,6 +95,7 @@ class Player(SpriteSheetAnimation):
             self.collision = False
             self.hitting = False
             # camera.shake(1, magnitude=10)
+            self.armor.animate_color(color.rgb(0, 0, 100, 100), 0.5)
             HitParticles(self.x, self.y - self.scale_x / 2, self.z)
             invoke(self.turn_on_collision, delay=3)
     
@@ -102,7 +108,13 @@ class Player(SpriteSheetAnimation):
         # Camera rotation
         camera.look_at(self)
 
+        # Armor update
+        self.armor.position = self.position
+        self.armor.y = self.y - .5
+
+
     def turn_on_collision(self):
+        self.armor.animate_color(color.rgb(0, 0, 100, 0), 0.5)
         self.collision = 'box'
 
     def close_app(self):
@@ -118,8 +130,6 @@ class Player(SpriteSheetAnimation):
 
         if key == 'space':
             SpawnParticles(self.x, self.y - self.scale_x / 2, self.z)
-            # self.change_animation('jump')
-            # self.play_animation('jump')
 
         if key == 'shift': self.is_shift = True
         if key == 'shift up': self.is_shift = False
