@@ -2,7 +2,7 @@ from ursina import Entity, color, held_keys, SpriteSheetAnimation, camera, invok
 from ursina.shaders import *
 from modules.config_loader import config, is_exit
 from modules.particles import SpawnParticles, HitParticles
-from modules.HUD import Stamina, Exit, NickOnHead
+from modules.HUD import Stamina, Exit, NickOnHead, Health
 
 ANIMATION_SET = {
     'walk': ('assets/Blue_Slime/walk', (8, 1)),
@@ -40,17 +40,21 @@ class Player(SpriteSheetAnimation):
 
         # Hitting
         self.hitting = False
-        self.lives = 3
+        self.lives = 5
 
         # Load HUD
         self.stamina = Stamina(.5, self)
         self.nickanme = NickOnHead('MaoriToma', self)
+        self.health = Health(.5, self)
 
         # Check variables
         self.is_shift = False
 
         # Run Idle Animation
         self.play_animation('idle')
+
+        # Hurt screen
+        self.status_hurt = Entity(model='quad', parent=camera.ui, scale_x=2, color=color.rgb(255, 0, 0, 0))
 
     def change_animation(self, anim):
         '''Change Player Animation'''
@@ -95,6 +99,14 @@ class Player(SpriteSheetAnimation):
             self.collision = False
             self.hitting = False
             # camera.shake(1, magnitude=10)
+            if self.health.scale_x > .2:
+                self.lives -= 1
+                self.health.scale_x -= .1
+                self.status_hurt.animate_color(color.rgb(255, 0, 0, 100 // self.lives))
+            else:
+                Exit('GAME OVER!')
+                invoke(self.close_app, delay=2)
+
             self.armor.animate_color(color.rgb(0, 0, 100, 100), 0.5)
             HitParticles(self.x, self.y - self.scale_x / 2, self.z)
             invoke(self.turn_on_collision, delay=3)
